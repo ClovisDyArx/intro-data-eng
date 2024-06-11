@@ -20,7 +20,7 @@ object DroneDataProducer extends App {
     println(s"Sent: $droneInfo")
     Thread.sleep(interval) // toutes les 'interval' ms.
   }
-  // producer.close() // generation infinie
+  producer.close() // generation infinie
 
   implicit class DroneInfoJson(droneInfo: DroneInfo) {
     def toJsonString: String = {

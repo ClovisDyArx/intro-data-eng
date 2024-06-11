@@ -11,6 +11,8 @@ libraryDependencies ++= Seq(
   "org.scalatest" %% "scalatest" % "3.2.10" % Test,
 )
 
+//libraryDependencies += "ch.qos.logback" % "logback-classic" % "1.1.3" % Runtime // pour avoir des logs très détaillés.
+
 
 
 resolvers ++= Seq(
