@@ -1,4 +1,4 @@
-import java.time.LocalDate
+import java.time.{LocalDateTime}
 import scala.util.Random
 
 object DroneDataGenerator {
@@ -7,7 +7,7 @@ object DroneDataGenerator {
   def generateDroneInfo(): DroneInfo = {
     DroneInfo(
       id = Random.alphanumeric.take(10).mkString, //ex: S69E69X69Y
-      created = LocalDate.now(), // timestamp
+      created = LocalDateTime.now(), // timestamp
       latitude = Random.between(-90.0f, 90.0f), // [-90.0, 90.0]
       longitude = Random.between(-180.0f, 180.0f), // [-180.0, 180.0]
       event_type = eventTypes(Random.nextInt(eventTypes.length)), // ex: tsunami
