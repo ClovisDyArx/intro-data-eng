@@ -1,7 +1,7 @@
-import java.time.LocalDate
+import java.time.LocalDateTime
 
 case class AlertMessage(
-                         timestamp: LocalDate,
+                         timestamp: LocalDateTime,
                          dangerLevel: Int,
                          survivors: Int,
                          latitude: Float,

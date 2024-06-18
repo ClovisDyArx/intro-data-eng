@@ -11,7 +11,7 @@ import pureconfig.generic.auto._
 
 object NotificationConsumer {
 
-  private val emailDestination :String = "erica.theprowler@gmail.com"
+  private val emailDestination :String = "alertes.drones@gmail.com"
 
   def main(args: Array[String]): Unit = {
     val consumerProps = new Properties()
@@ -27,8 +27,8 @@ object NotificationConsumer {
   }
 
   def processRecords(consumer: KafkaConsumer[String, String]): Unit = {
-    Stream.continually(consumer.poll(1000))
-      .flatMap(_.asScala)
+    consumer.poll(java.time.Duration.ofMillis(1000))
+      .asScala
       .foreach(record => handleAlert(record.value()))
   }
 

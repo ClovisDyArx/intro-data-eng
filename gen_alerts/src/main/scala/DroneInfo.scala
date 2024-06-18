@@ -1,8 +1,8 @@
-import java.time.LocalDate
+import java.time.LocalDateTime
 
 case class DroneInfo(
                       id: String,
-                      created: LocalDate,
+                      created: LocalDateTime,
                       latitude: Float,
                       longitude: Float,
                       event_type: String,
