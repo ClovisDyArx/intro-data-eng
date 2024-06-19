@@ -2,14 +2,14 @@ import org.apache.spark.SparkConf
 import org.apache.spark.sql.{SaveMode, SparkSession}
 import org.apache.spark.streaming.{Seconds, StreamingContext}
 import org.apache.spark.streaming.kafka010._
-import java.time.LocalDate
+import java.time.{LocalDateTime}
 import com.typesafe.config.ConfigFactory
 import java.nio.file.Paths
 
 //TODO : find why it can't find it from the other file..
 case class DroneInfo(
   id: String,
-  created: LocalDate,
+  created: LocalDateTime,
   latitude: Float,
   longitude: Float,
   event_type: String,
@@ -19,7 +19,7 @@ case class DroneInfo(
 
 object DroneDataProcessor {
   def main(args: Array[String]): Unit = {
-    val config = ConfigFactory.load("application.conf")
+    val config = ConfigFactory.load("storage.conf")
 
     val sparkConf = new SparkConf()
       .setAppName("DroneDataProcessor")
@@ -69,7 +69,7 @@ object DroneDataProcessor {
 
     DroneInfo(
       id = (parsed \ "id").extract[String],
-      created = LocalDate.parse((parsed \ "created").extract[String]),
+      created = LocalDateTime.parse((parsed \ "created").extract[String]),
       latitude = (parsed \ "latitude").extract[Float],
       longitude = (parsed \ "longitude").extract[Float],
       event_type = (parsed \ "event_type").extract[String],
