@@ -38,6 +38,7 @@ object AlertConsumer{
         .asScala
         .foreach(record => handleData(record.value(), producer))
       }
+      .foreach(identity)
     }
 
   private def handleData(data: String, producer: KafkaProducer[String, String]): Unit = {

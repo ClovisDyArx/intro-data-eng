@@ -4,6 +4,7 @@ Fichier permettant la lecture et le traitement des données de la stream contena
 
 Ce fichier peut également générer des mails si la ligne est décommentée (celle-ci n'est pas toujours mise à cause de la limite de mails pouvant être envoyé par jour).
 
+Le récepteur des mails peut être changé en modifiant la variable emailDestination.
 ## **AlertMessage.scala**
 
 Fichier contenant la déclaration de la classe utilisée pour la récupération d'alertes:
