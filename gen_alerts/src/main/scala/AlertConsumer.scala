@@ -4,7 +4,8 @@ import org.apache.kafka.clients.producer.{KafkaProducer, ProducerConfig, Produce
 import org.apache.kafka.common.serialization.{StringDeserializer, StringSerializer}
 import io.circe.parser.decode
 import io.circe.generic.auto._
-import io.circe.syntax._
+import io.circe.syntax.EncoderOps
+
 import scala.jdk.CollectionConverters._
 
 object AlertConsumer{
@@ -32,12 +33,14 @@ object AlertConsumer{
   }
 
   def processRecords(consumer: KafkaConsumer[String, String], producer: KafkaProducer[String, String]): Unit = {
-    consumer.poll(java.time.Duration.ofMillis(1000))
-      .asScala
-      .foreach(record => handleData(record.value(), producer))
-  }
+    LazyList.continually {
+      consumer.poll(java.time.Duration.ofMillis(1000))
+        .asScala
+        .foreach(record => handleData(record.value(), producer))
+      }
+    }
 
-  def handleData(data: String, producer: KafkaProducer[String, String]): Unit = {
+  private def handleData(data: String, producer: KafkaProducer[String, String]): Unit = {
     decode[DroneInfo](data) match {
       case Right(droneInfo: DroneInfo) =>
         processDroneData(droneInfo).foreach { alert =>
