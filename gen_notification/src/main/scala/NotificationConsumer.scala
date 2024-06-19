@@ -43,8 +43,10 @@ object NotificationConsumer {
   private val emailDestination :String = "alertes.drones@gmail.com"
 
   def main(args: Array[String]): Unit = {
+    val bootstrapServers = sys.env.getOrElse("KAFKA_BOOTSTRAP_SERVERS", "localhost:9092")
+
     val consumerProps = new Properties()
-    consumerProps.put(ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG, "localhost:9092")
+    consumerProps.put("bootstrap.servers", bootstrapServers)
     consumerProps.put(ConsumerConfig.GROUP_ID_CONFIG, "notification-consumer-group")
     consumerProps.put(ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG, classOf[StringDeserializer])
     consumerProps.put(ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG, classOf[StringDeserializer])

@@ -13,14 +13,16 @@ object AlertConsumer{
   def main(args: Array[String]): Unit = {
     val topic = "quickstart-events"
 
+    val bootstrapServers = sys.env.getOrElse("KAFKA_BOOTSTRAP_SERVERS", "localhost:9092")
+
     val consumerProps = new Properties()
-    consumerProps.put(ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG, "localhost:9092")
+    consumerProps.put("bootstrap.servers", bootstrapServers)
     consumerProps.put(ConsumerConfig.GROUP_ID_CONFIG, "alert-consumer-group")
     consumerProps.put(ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG, classOf[StringDeserializer])
     consumerProps.put(ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG, classOf[StringDeserializer])
 
     val producerProps = new Properties()
-    producerProps.put(ProducerConfig.BOOTSTRAP_SERVERS_CONFIG, "localhost:9092")
+    producerProps.put("bootstrap.servers", bootstrapServers)
     producerProps.put(ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG, classOf[StringSerializer])
     producerProps.put(ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG, classOf[StringSerializer])
 
