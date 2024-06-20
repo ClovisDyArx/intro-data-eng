@@ -11,23 +11,23 @@ import scala.jdk.CollectionConverters._
 object AlertConsumer{
 
   def main(args: Array[String]): Unit = {
-    val topic = "quickstart-events"
+    val topic: String = "quickstart-events"
 
-    val bootstrapServers = sys.env.getOrElse("KAFKA_BOOTSTRAP_SERVERS", "localhost:9092")
+    val bootstrapServers: String = sys.env.getOrElse("KAFKA_BOOTSTRAP_SERVERS", "localhost:9092")
 
-    val consumerProps = new Properties()
+    val consumerProps: Properties = new Properties()
     consumerProps.put("bootstrap.servers", bootstrapServers)
     consumerProps.put(ConsumerConfig.GROUP_ID_CONFIG, "alert-consumer-group")
     consumerProps.put(ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG, classOf[StringDeserializer])
     consumerProps.put(ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG, classOf[StringDeserializer])
 
-    val producerProps = new Properties()
+    val producerProps: Properties = new Properties()
     producerProps.put("bootstrap.servers", bootstrapServers)
     producerProps.put(ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG, classOf[StringSerializer])
     producerProps.put(ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG, classOf[StringSerializer])
 
-    val consumer : KafkaConsumer[String, String] = new KafkaConsumer[String, String](consumerProps)
-    val producer = new KafkaProducer[String, String](producerProps)
+    val consumer: KafkaConsumer[String, String] = new KafkaConsumer[String, String](consumerProps)
+    val producer: KafkaProducer[String, String] = new KafkaProducer[String, String](producerProps)
 
     consumer.subscribe(List(topic).asJava)
 
@@ -48,7 +48,7 @@ object AlertConsumer{
       case Right(droneInfo: DroneInfo) =>
         processDroneData(droneInfo).foreach { alert =>
           println(s"ALERT: ${alert.message}")
-          val alertJson = alert.asJson.noSpaces
+          val alertJson: String = alert.asJson.noSpaces
           producer.send(new ProducerRecord[String, String]("alert-notifications", alertJson))
         }
       case Left(error) =>
