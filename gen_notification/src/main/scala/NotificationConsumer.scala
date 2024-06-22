@@ -11,68 +11,59 @@ import pureconfig.generic.auto._
 import io.github.cdimascio.dotenv.Dotenv
 import com.typesafe.config.{Config, ConfigFactory}
 
-object NotificationConsumer {
+object NotificationConsumer extends App {
   //Utilisation des variables d'environnement
-  private val dotenv = Dotenv.load()
-  private val config = ConfigFactory.load()
-  private val configWithEnv = ConfigFactory.parseString(
+  val dotenv = Dotenv.load()
+  val config = ConfigFactory.load()
+  val configWithEnv = ConfigFactory.parseString(
     config
       .root()
       .render()
       .replace("REPLACE_WITH_USER", dotenv.get("MAIL_USERNAME"))
       .replace("REPLACE_WITH_PASS", dotenv.get("MAIL_PASSWORD"))
   ).withFallback(config)
-  private val emailConfig: EmailConfig = ConfigSource.fromConfig(configWithEnv).loadOrThrow[EmailConfig]
+  val emailConfig: EmailConfig = ConfigSource.fromConfig(configWithEnv).loadOrThrow[EmailConfig]
 
   //initialisation de la session de mails
-  private val propsMails = new Properties()
+  val propsMails: Properties = new Properties()
   propsMails.put("mail.smtp.auth", "true")
   propsMails.put("mail.smtp.starttls.enable", "true")
   propsMails.put("mail.smtp.host", "smtp.gmail.com")
   propsMails.put("mail.smtp.port", "587")
   propsMails.put("mail.smtp.ssl.protocols", "TLSv1.2")
-  private val session = Session.getInstance(propsMails, new javax.mail.Authenticator {
+  val session: Session = Session.getInstance(propsMails, new javax.mail.Authenticator {
     override protected def getPasswordAuthentication: javax.mail.PasswordAuthentication = {
       new javax.mail.PasswordAuthentication(emailConfig.username, emailConfig.password)
     }
   })
 
   //destinataire
-  private val emailDestination :String = "alertes.drones@gmail.com"
+  val emailDestination: String = "alertes.drones@gmail.com"
 
-  def main(args: Array[String]): Unit = {
-    val bootstrapServers:String = sys.env.getOrElse("KAFKA_BOOTSTRAP_SERVERS", "localhost:9092")
+  val topic = "alert-notifications"
 
-    val consumerProps: Properties = new Properties()
-    consumerProps.put("bootstrap.servers", bootstrapServers)
-    consumerProps.put(ConsumerConfig.GROUP_ID_CONFIG, "notification-consumer-group")
-    consumerProps.put(ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG, classOf[StringDeserializer])
-    consumerProps.put(ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG, classOf[StringDeserializer])
+  val bootstrapServers: String = sys.env.getOrElse("KAFKA_BOOTSTRAP_SERVERS", "localhost:9092")
 
-    val consumer: KafkaConsumer[String, String] = new KafkaConsumer[String, String](consumerProps)
-    consumer.subscribe(List("alert-notifications").asJava)
+  val consumerProps: Properties = new Properties()
+  consumerProps.put("bootstrap.servers", bootstrapServers)
+  consumerProps.put(ConsumerConfig.GROUP_ID_CONFIG, "notification-consumer-group")
+  consumerProps.put(ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG, classOf[StringDeserializer])
+  consumerProps.put(ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG, classOf[StringDeserializer])
+  consumerProps.put(ConsumerConfig.AUTO_OFFSET_RESET_CONFIG, "earliest")
 
-    processRecords(consumer)
-  }
+  val consumer: KafkaConsumer[String, String] = new KafkaConsumer[String, String](consumerProps)
+  consumer.subscribe(List(topic).asJava)
 
+  processRecords(consumer)
+
+  //Récupération des alertes par batch (nécessaire pour gérer l'envoie des mails)
   def processRecords(consumer: KafkaConsumer[String, String]): Unit = {
-    val batchSize: Int = 100
-    val delayBetweenBatches: Int = 10000
-
     LazyList.continually {
-      consumer.poll(java.time.Duration.ofMillis(1000))
-        .asScala
-        .toList
-        .grouped(batchSize)
-        .foreach { batch =>
-        batch.foreach { record =>
-          handleAlert(record.value())
-        }
-
-        println(s"Processed batch of size ${batch.size}. Waiting for next batch.")
-        Thread.sleep(delayBetweenBatches)
+        consumer.poll(java.time.Duration.ofMillis(1000))
+          .asScala
+          .foreach(record => handleAlert(record.value()))
       }
-    }.foreach(identity)
+      .foreach(identity)
   }
 
   def handleAlert(data: String): Unit = {
@@ -88,6 +79,7 @@ object NotificationConsumer {
     }
   }
 
+  //Envoie des mails
   def sendEmail(to: String, subject: String, body: String): Unit = {
 
     try {
