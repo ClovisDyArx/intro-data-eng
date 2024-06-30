@@ -73,7 +73,7 @@ object NotificationConsumer extends App {
         /*Seulement si le batch est petit. Nous avons une limite du nombre d'envoie possible avec gmail.
           Le problème peut être résolu en utilisant des api faites pour ça comme SendGrid par exemple mais
           nous ne sommes pas une entreprise.*/
-        //sendEmail(emailDestination, "Drone Alert", alert.message)
+        sendEmail(emailDestination, "Drone Alert", alert.message)
       case Left(error) =>
         println(s"Failed to decode alert message: $error")
     }
