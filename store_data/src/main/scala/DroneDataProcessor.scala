@@ -6,7 +6,6 @@ import java.time.{LocalDateTime}
 import com.typesafe.config.ConfigFactory
 import java.nio.file.Paths
 
-//TODO : find why it can't find it from the other file..
 case class DroneInfo(
   id: String,
   created: LocalDateTime,
