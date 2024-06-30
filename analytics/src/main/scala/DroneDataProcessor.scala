@@ -30,7 +30,7 @@ object DroneDataAnalyticsApp {
     val summaryStats = droneDF.describe("danger_level", "survivors").toJSON.collect().mkString("[", ",", "]")
     val eventTypeCounts = droneDF.groupBy("event_type").count().toJSON.collect().mkString("[", ",", "]")
     val avgDangerLevel = droneDF.groupBy("event_type").agg(org.apache.spark.sql.functions.avg("danger_level")).toJSON.collect().mkString("[", ",", "]")
-    //val totalSurvivors = droneDF.agg(org.apache.spark.sql.functions.sum("survivors")).toJSON.collect().mkString("[", ",", "]")
+    val totalSurvivors = droneDF.agg(org.apache.spark.sql.functions.sum("survivors")).toJSON.collect().mkString("[", ",", "]")
     
     // HTML UI
     val htmlContent = s"""
@@ -50,10 +50,12 @@ object DroneDataAnalyticsApp {
     |            const summaryStats = $summaryStats;
     |            const eventTypeCounts = $eventTypeCounts;
     |            const avgDangerLevel = $avgDangerLevel;
+    |            const totalSurvivors = $totalSurvivors;
     |
     |            document.getElementById('summaryStatistics').innerHTML = createTable(summaryStats, 'Summary Statistics');
     |            document.getElementById('eventTypeCounts').innerHTML = createTable(eventTypeCounts, 'Event Type Counts');
     |            document.getElementById('averageDangerLevel').innerHTML = createTable(avgDangerLevel, 'Average Danger Level');
+    |            document.getElementById('survivorsCount').innerHTML = createTable(totalSurvivors, 'Total Survivors')
     |        }
     |
     |        function createTable(data, title) {
@@ -80,6 +82,7 @@ object DroneDataAnalyticsApp {
     |    <div id="summaryStatistics"></div>
     |    <div id="eventTypeCounts"></div>
     |    <div id="averageDangerLevel"></div>
+    |    <div id="survivorsCount"></div>
     |</body>
     |</html>
     |""".stripMargin
@@ -87,8 +90,7 @@ object DroneDataAnalyticsApp {
     // HTTP server
     val server = new ServerSocket(8080)
     println("Server is running on http://localhost:8080")
-    while (true) {
-      val socket = server.accept()
+    Iterator.continually(server.accept()).foreach { socket =>
       new Thread(new Runnable {
         def run(): Unit = {
           handleRequest(socket, htmlContent)
