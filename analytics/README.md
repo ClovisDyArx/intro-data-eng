@@ -17,5 +17,5 @@ The average number of survivors for a natural disaster is 10.
 The most common natural disaster is the landslide with 17 instances since the beginning of the measuring.
 - **What type of natural disaster is the most dangerous on average ?** :
 The most dangerous natural disaster is the wildfire with an average danger level of 3.21.
-- **Is there more disasters that generates an alert or that doesn't generate one**
+- **Is there more disasters that generates an alert or that doesn't generate one ?**
 Approximately 60% of the disasters results in an alert.
